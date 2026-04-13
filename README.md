@@ -1,8 +1,7 @@
 # ☁️ Huawei Cloud Serverless FinOps & Audit Engine
 
 > **Enterprise-Grade Serverless FinOps Platform**  
-> An autonomous, event-driven cloud cost optimization and audit engine built on Huawei Cloud.  
-> Designed to detect idle resources, quantify waste, and enforce zero-waste infrastructure policies at scale.
+> Autonomous, event-driven cloud cost optimization and audit engine built on Huawei Cloud.
 
 ---
 
@@ -19,16 +18,16 @@
 
 ## 🌍 Overview
 
-Cloud environments at enterprise scale often suffer from **hidden cost inefficiencies** — unused storage, detached volumes, and forgotten resources silently accumulating expenses.
+Enterprise cloud environments often suffer from **hidden cost inefficiencies** — unused storage, detached volumes, and forgotten resources silently accumulating expenses.
 
 This project introduces a **Serverless FinOps & Audit Engine** that:
 
 - Detects idle cloud resources automatically  
 - Quantifies wasted storage and cost impact  
-- Provides actionable insights for optimization  
-- Operates fully autonomously with zero manual intervention  
+- Provides actionable insights  
+- Operates fully autonomously  
 
-Built entirely using **Huawei Cloud native services**, this platform demonstrates how organizations can implement **continuous cost governance (FinOps)** using modern cloud-native principles.
+Built using **Huawei Cloud native services**, this platform demonstrates how organizations can implement **continuous cost governance (FinOps)** using cloud-native principles.
 
 ---
 
@@ -36,105 +35,142 @@ Built entirely using **Huawei Cloud native services**, this platform demonstrate
 
 > "You can't optimize what you don't continuously audit."
 
-This project aims to enforce:
+This system enforces:
 
-- **Zero-Waste Infrastructure**  
-- **Continuous Cost Visibility**  
-- **Autonomous Cloud Governance**  
-
-By combining **Serverless computing, event-driven architecture, and Infrastructure as Code**, it ensures cost optimization becomes a **built-in system behavior**, not a manual task.
+- Zero-Waste Infrastructure  
+- Continuous Cost Visibility  
+- Autonomous Cloud Governance  
 
 ---
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture
 
-### 🔁 Event-Driven Serverless FinOps Workflow
+### 🔁 Event-Driven Serverless Workflow
 
 ```mermaid
 flowchart LR
 
 A[⏰ CRON Trigger<br/>03:00 AM Daily] --> B[⚡ FunctionGraph<br/>Audit Engine]
-B --> C[🔍 EVS API Scan<br/>Idle Disks Detection]
-C --> D[📊 Cost Analysis<br/>Wasted Storage Calculation]
-D --> E[📄 Logs / Alerts<br/>FinOps Insights]
+B --> C[🔍 EVS Scan<br/>Idle Disk Detection]
+C --> D[📊 Cost Analysis<br/>Wasted Storage]
+D --> E[📄 Logs & Insights]
 ```
 
 ---
 
 ## 🧠 Architecture Breakdown
 
-### 1️⃣ Serverless Compute Layer (FunctionGraph)
+### 1️⃣ Serverless Compute (FunctionGraph)
 
-- Python-based audit engine deployed as a **FunctionGraph function**
-- Executes only when triggered → **zero idle cost**
-- Scales automatically based on execution demand  
+- Runs only when triggered → **zero idle cost**
+- Fully scalable execution model  
+- Python-based audit engine  
 
 ---
 
 ### 2️⃣ Event-Driven Automation
 
-- Triggered via **CRON schedule (daily at 03:00 AM)**  
-- Fully automated auditing cycle  
-- No manual execution required  
+- Scheduled via CRON trigger (daily at 03:00 AM)  
+- Fully autonomous execution  
 
 ---
 
-### 3️⃣ Cloud Resource Audit Logic
+### 3️⃣ Resource Audit Logic
 
-The engine performs:
-
-- Scans **Elastic Volume Service (EVS)** disks  
-- Identifies:
-  - Detached volumes (`available` state)  
-  - Unused storage resources  
-- Calculates:
-  - Total wasted storage (GB)  
-  - Potential cost impact  
+- Scans EVS (Elastic Volume Service) disks  
+- Detects:
+  - Detached volumes (`available`)  
+  - Idle storage resources  
+- Calculates wasted storage (GB)  
 
 ---
 
-### 4️⃣ FinOps Insight Generation
+### 4️⃣ FinOps Insights
 
-- Outputs structured logs and audit summaries  
-- Enables:
-  - Cost visibility  
-  - Resource optimization decisions  
-  - Governance reporting  
+- Generates structured logs  
+- Provides cost optimization insights  
+- Enables governance reporting  
 
 ---
 
-### 5️⃣ Security & Access Control (IAM)
+### 5️⃣ Security (IAM)
 
-- Implements **Least Privilege Principle**  
-- Uses **IAM Agency with ReadOnly permissions**
-  - `EVS ReadOnlyAccess`  
-- Ensures:
-  - No mutation of resources  
-  - Secure audit-only execution  
+- Uses **least-privilege IAM policy**
+- `EVS ReadOnlyAccess`
+- No mutation permissions → audit-only mode  
 
 ---
 
 ### 6️⃣ Infrastructure as Code (Terraform)
 
-- Entire stack is provisioned via Terraform:
-  - IAM roles & policies  
-  - FunctionGraph deployment  
+- Provisions:
+  - IAM roles  
+  - FunctionGraph  
   - CRON triggers  
-  - Code packaging (ZIP)  
+  - Deployment packages  
 
-✅ Fully reproducible  
-✅ Version-controlled infrastructure  
-✅ Zero manual setup  
+✔ Reproducible  
+✔ Version-controlled  
+✔ Fully automated  
 
 ---
 
-## ⚙️ Core Principles
+## 📊 Observability & Monitoring (SRE)
 
-- **Serverless First** → No idle infrastructure cost  
-- **Event-Driven Execution** → Automated lifecycle  
-- **FinOps by Design** → Cost optimization as a system feature  
-- **Least Privilege Security** → Safe cloud auditing  
-- **IaC Everything** → Fully declarative infrastructure  
+The platform integrates a **production-grade observability stack** aligned with modern **SRE practices**, provisioned via **Terraform and Helm**.
+
+---
+
+### 🔍 Monitoring Stack
+
+- **Prometheus**
+  - Auto-discovers Kubernetes services  
+  - Scrapes metrics from:
+    - FastAPI endpoints (`/metrics`)  
+    - Kubernetes nodes  
+  - Stores time-series data  
+
+- **Grafana**
+  - Pre-configured dashboards  
+  - Visualizes:
+    - Cluster health  
+    - CPU & memory usage  
+    - HTTP error rates  
+    - Request throughput  
+
+---
+
+### ⚙️ Deployment Model
+
+```bash
+terraform apply
+```
+
+Automatically:
+
+- Installs `kube-prometheus-stack` via Helm  
+- Deploys Prometheus Operator  
+- Configures Grafana dashboards  
+- Enables ServiceMonitor-based discovery  
+
+---
+
+### 📡 Capabilities
+
+- Auto service discovery  
+- Centralized monitoring  
+- Real-time metrics  
+- Scalable observability  
+- Infrastructure as Code  
+
+---
+
+### 🚨 Optional Extensions
+
+- Alertmanager (Slack / Email alerts)  
+- SLO / SLI tracking  
+- Distributed tracing (Jaeger)  
+- Log aggregation (Loki / ELK)  
 
 ---
 
@@ -143,13 +179,13 @@ The engine performs:
 ```text
 .
 ├── infrastructure/
-│   ├── provider.tf         # Huawei Cloud provider & archive configuration
-│   ├── iam.tf              # IAM Agency & least-privilege policies
-│   └── function.tf         # FunctionGraph setup, packaging & CRON triggers
+│   ├── provider.tf
+│   ├── iam.tf
+│   └── function.tf
 │
 └── src/
-    ├── audit_engine.py     # Core audit logic (Huawei Cloud SDK - EVS scanning)
-    └── requirements.txt    # Python dependencies
+    ├── audit_engine.py
+    └── requirements.txt
 ```
 
 ---
@@ -160,11 +196,11 @@ The engine performs:
 
 - Terraform (v1.0+)  
 - Python 3.10+  
-- Huawei Cloud account with API credentials  
+- Huawei Cloud credentials  
 
 ---
 
-## 1️⃣ Initialize Infrastructure
+### 1️⃣ Initialize
 
 ```bash
 cd infrastructure
@@ -173,7 +209,7 @@ terraform init
 
 ---
 
-## 2️⃣ Plan Deployment
+### 2️⃣ Plan
 
 ```bash
 terraform plan
@@ -181,36 +217,21 @@ terraform plan
 
 ---
 
-## 3️⃣ Deploy Stack
+### 3️⃣ Apply
 
 ```bash
 terraform apply -auto-approve
 ```
 
-### 🔄 What Happens Automatically?
-
-- Python source code is packaged into a ZIP archive  
-- FunctionGraph function is created  
-- IAM roles and permissions are configured  
-- CRON trigger is attached  
-- Audit engine becomes active  
-
 ---
 
 ## ⚡ Runtime Behavior
 
-Once deployed:
-
-- The system runs **every night at 03:00 AM**  
-- It scans the `tr-west-1` region  
-- Detects:
-  - Idle EVS disks  
-  - Detached volumes  
-- Calculates:
-  - Total wasted storage (GB)  
-- Outputs:
-  - Logs  
-  - Cost insights  
+- Runs daily at **03:00 AM**  
+- Scans `tr-west-1` region  
+- Detects idle EVS disks  
+- Calculates wasted storage  
+- Outputs cost insights  
 
 ---
 
@@ -227,30 +248,29 @@ Once deployed:
 
 ## 💡 Key Capabilities
 
-- ⚡ Serverless cost optimization engine  
-- 🔍 Automated cloud resource auditing  
-- 📊 Real-time FinOps insights  
-- 🔐 Secure read-only access model  
-- 🔄 Fully automated scheduling  
-- ☁️ Cloud-native architecture  
-- 📦 Infrastructure as Code (Terraform)  
+- Serverless FinOps engine  
+- Automated cloud auditing  
+- Real-time cost insights  
+- Secure IAM model  
+- Event-driven execution  
+- Fully automated lifecycle  
 
 ---
 
 ## 🧠 What This Project Demonstrates
 
-- Enterprise-level **FinOps practices**  
-- Serverless cloud architecture design  
-- Cost optimization strategies in cloud environments  
-- Secure IAM-based access control  
-- Automated auditing pipelines  
-- Real-world cloud governance implementation  
+- FinOps practices  
+- Serverless architecture  
+- Cloud cost optimization  
+- Secure IAM usage  
+- Automated governance  
+- Infrastructure as Code  
 
 ---
 
 ## 👨‍💻 Developer
 
-**Ali Gaffar Toksoy**  
+**Ali Gaffar Toksoy**
 
 Cloud Engineering • DevOps • FinOps  
 
@@ -260,7 +280,7 @@ Cloud Engineering • DevOps • FinOps
 
 ## ⭐ Final Note
 
-This project showcases how **modern FinOps practices** can be automated using serverless technologies.
+This project demonstrates how **cloud cost optimization can be automated**.
 
 Instead of manually tracking costs, the system:
 
@@ -270,6 +290,6 @@ Instead of manually tracking costs, the system:
 
 All in a fully automated, cloud-native workflow.
 
-If you found this project valuable, consider giving it a ⭐
+If you found this useful, consider giving it a ⭐
 
 ---
