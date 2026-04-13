@@ -1,38 +1,39 @@
-# 1. Terraform bizim yerimize Python kodunu ZIP dosyası yapar
-data "archive_file" "function_zip" {
-  type        = "zip"
-  source_dir  = "../src"
-  output_path = "finops_engine.zip"
+terraform {
+  required_providers {
+    huaweicloud = {
+      source  = "huaweicloud/huaweicloud"
+      version = "~> 1.60.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.23.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.11.0"
+    }
+  }
 }
 
-# 2. Serverless Fonksiyonu yaratıyoruz
-resource "huaweicloud_fgs_function" "finops_auditor" {
-  name        = "finops-idle-disk-auditor"
-  app         = "default"
-  agency      = huaweicloud_identity_agency.finops_agency.name
-  memory_size = 128     # Sadece 128MB RAM! En ucuz profil.
-  timeout     = 30      # 30 saniye içinde işini bitirmezse sistemi yormamak için durdur.
-  runtime     = "Python3.10"
-  handler     = "audit_engine.handler" # DosyaAdı.FonksiyonAdı
-
-  # HATANIN ÇÖZÜMÜ: Huawei Cloud Kod Yükleme Standartları
-  code_type = "zip"
-  func_code = filebase64(data.archive_file.function_zip.output_path)
-
-  # Kodun içindeki ortam değişkenleri (ENV)
-  user_data = jsonencode({
-    PROJECT_ID = "MOCK_PROJECT_ID"
-  })
+provider "huaweicloud" {
+  region     = "tr-west-1"
+  access_key = "MOCK_AK"
+  secret_key = "MOCK_SK"
 }
 
-# 3. Otonom Zamanlayıcı (CRON) Tetikleyici
-resource "huaweicloud_fgs_trigger" "nightly_cron" {
-  function_urn = huaweicloud_fgs_function.finops_auditor.urn
-  type         = "TIMER"
-  status       = "ACTIVE"
-  timer {
-    name           = "nightly-audit"
-    schedule_type  = "Cron"
-    schedule       = "0 0 3 * * ?" # Her gece saat 03:00'te uyan
+# Terraform'un K8s kümemizle (CCE) konuşabilmesi için kimlik ayarları
+provider "kubernetes" {
+  host                   = "https://MOCK_CCE_IP:5443"
+  client_certificate     = "MOCK_CERT"
+  client_key             = "MOCK_KEY"
+  cluster_ca_certificate = "MOCK_CA"
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = "https://MOCK_CCE_IP:5443"
+    client_certificate     = "MOCK_CERT"
+    client_key             = "MOCK_KEY"
+    cluster_ca_certificate = "MOCK_CA"
   }
 }
