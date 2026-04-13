@@ -1,12 +1,12 @@
-# FunctionGraph servisinin kullanabileceği bir rol oluşturuyoruz
+# FunctionGraph servisinin kullanabileceği kimlik ve yetki bloğu (Huawei Cloud Native)
 resource "huaweicloud_identity_agency" "finops_agency" {
   name                   = "serverless-finops-auditor-role"
-  description            = "FinOps motoru icin salt okunur yetkiler"
-  delegated_service_name = "op_svc_cce" # Huawei FunctionGraph arka plan servisi
-}
+  description            = "FinOps motoru icin otonom silme (Terminator) yetkileri"
+  delegated_service_name = "op_svc_cce" # FunctionGraph arka plan servisi
 
-# Bu role sadece 'EVS ReadOnlyAccess' (Diskleri Okuma) yetkisi atıyoruz
-resource "huaweicloud_identity_agency_policy" "finops_read_policy" {
-  agency_name = huaweicloud_identity_agency.finops_agency.name
-  policy_name = "EVS ReadOnlyAccess"
+  # Hatanın çözümü: Huawei Cloud'da yetkiler bu bloğun içine yazılır
+  project_role {
+    project = "tr-west-1"
+    roles   = ["EVS Administrator"] # Diskleri silme yetkisi
+  }
 }
