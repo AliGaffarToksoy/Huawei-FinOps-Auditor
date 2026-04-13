@@ -1,13 +1,12 @@
 import os
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkevs.v2.region.evs_region import EvsRegion
-from huaweicloudsdkevs.v2 import EvsClient, ListVolumesRequest
+from huaweicloudsdkevs.v2 import EvsClient, ListVolumesRequest, DeleteVolumeRequest
 
-# FunctionGraph (Serverless) her tetiklendiğinde bu fonksiyonu çalıştırır
+
 def handler(event, context):
-    print("🔍 FinOps Denetim Motoru Uyandı. Tarama başlatılıyor...")
+    print("🤖 FinOps Terminatör Motoru Uyandı. Otonom imha protokolü başlatılıyor...")
 
-    # Güvenlik standardı: Anahtarlar asla koda yazılmaz, ortam değişkeninden (IAM) alınır
     ak = os.getenv("AK", "MOCK_AK")
     sk = os.getenv("SK", "MOCK_SK")
     project_id = os.getenv("PROJECT_ID", "MOCK_PROJECT_ID")
@@ -15,44 +14,43 @@ def handler(event, context):
     credentials = BasicCredentials(ak, sk, project_id)
 
     try:
-        # Huawei Cloud EVS (Elastic Volume Service) İstemcisini Başlat
         client = EvsClient.new_builder() \
             .with_credentials(credentials) \
             .with_region(EvsRegion.value_of("tr-west-1")) \
             .build()
 
-        # Tüm sunucu disklerini listele
+        # 1. Tüm diskleri listele
         request = ListVolumesRequest()
         response = client.list_volumes(request)
 
-        idle_disks = []
-        total_waste_gb = 0
+        deleted_disks = []
+        saved_money_gb = 0
 
-        # Zombi (Kullanılmayan) diskleri bul
-        # 'available' durumu, diskin hiçbir sunucuya (ECS) bağlı olmadığını gösterir
+        # 2. Boşta olan (available) diskleri bul ve SİL
         for volume in response.volumes:
             if volume.status == "available":
-                idle_disks.append(volume.name)
-                total_waste_gb += volume.size
+                print(f"🗑️ İSRAF TESPİT EDİLDİ: {volume.name} ({volume.id}). Otonom olarak siliniyor...")
 
-        # Raporlama
-        if idle_disks:
-            alert_msg = f"🚨 İSRAF TESPİT EDİLDİ! Toplam {len(idle_disks)} adet boşta disk var. İsraf edilen alan: {total_waste_gb} GB."
-            print(alert_msg)
-            # Burada normalde Slack veya SMN (Email) tetiklenir
-            return {
-                "status": "alert",
-                "wasted_storage_gb": total_waste_gb,
-                "idle_resources": idle_disks
-            }
+                # Silme İsteği (Terminatör Vuruşu)
+                delete_req = DeleteVolumeRequest(volume_id=volume.id)
+                client.delete_volume(delete_req)
+
+                deleted_disks.append(volume.name)
+                saved_money_gb += volume.size
+
+        # 3. Sonuç Raporu
+        if deleted_disks:
+            success_msg = f"✅ OTONOM TEMİZLİK TAMAMLANDI! {len(deleted_disks)} adet boşta disk silindi. Toplam {saved_money_gb} GB israf engellendi."
+            print(success_msg)
+            return {"status": "remediated", "deleted_resources": deleted_disks, "saved_gb": saved_money_gb}
         else:
-            print("✅ Sistem tertemiz. Boşta kaynak (İsraf) yok.")
+            print("💤 Sistem tertemiz. İmha edilecek israf bulunamadı.")
             return {"status": "clean"}
 
     except Exception as e:
-        print(f"❌ SDK Bağlantı Hatası: {str(e)}")
+        print(f"❌ SDK Kritik Hatası: {str(e)}")
         return {"status": "error", "message": str(e)}
 
-# Sadece lokalde test edebilmek için ufak bir tetikleyici
+
 if __name__ == "__main__":
     handler(None, None)
