@@ -14,10 +14,15 @@ resource "huaweicloud_fgs_function" "finops_auditor" {
   timeout     = 30      # 30 saniye içinde işini bitirmezse sistemi yormamak için durdur.
   runtime     = "Python3.10"
   handler     = "audit_engine.handler" # DosyaAdı.FonksiyonAdı
-  file        = data.archive_file.function_zip.output_path
+
+  # HATANIN ÇÖZÜMÜ: Huawei Cloud Kod Yükleme Standartları
+  code_type = "zip"
+  func_code = filebase64(data.archive_file.function_zip.output_path)
 
   # Kodun içindeki ortam değişkenleri (ENV)
-  user_data = "{\"PROJECT_ID\": \"MOCK_PROJECT_ID\"}"
+  user_data = jsonencode({
+    PROJECT_ID = "MOCK_PROJECT_ID"
+  })
 }
 
 # 3. Otonom Zamanlayıcı (CRON) Tetikleyici
